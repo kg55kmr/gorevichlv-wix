@@ -1,0 +1,23 @@
+@import url(//fonts.googleapis.com/css?family=Marck+Script&subset=cyrillic);
+
+li {
+    font-family: "Marck Script", serif;
+    font-weight: bold;
+    font-size: 35px;
+    color: black;
+    cursor: pointer;
+    background: no-repeat no-repeat 0 0;
+    list-style: none;
+    padding: 0 0 20px 64px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    margin-left: -40px;
+}
+
+ul li > *:first-child:not(a) {
+    display: none;
+}
+
+a {
+    color: blue;
+}

@@ -1,0 +1,10 @@
+li {
+    background: url(../img/icons/audio_book.png) no-repeat 0 0;
+}
+
+table {
+    border: 0;
+    font-size: 25px;
+    font-family: "Monotype Corsiva", serif;
+    font-weight: normal;
+}

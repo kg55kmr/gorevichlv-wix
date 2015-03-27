@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Гостьова книга</title>
+    <link href='//fonts.googleapis.com/css?family=EB+Garamond&subset=cyrillic' rel='stylesheet' type='text/css'>
+    <style>
+        html, body {
+            width: 900px;
+            margin: 0;
+        }
+
+        * {
+            font-family: "EB Garamond", sans-serif;
+            font-size: 25px;
+        }
+
+        #form_response {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #response {
+            resize: none;
+        }
+
+        #name, #response {
+            box-sizing: border-box;
+            display: block;
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+
+        #send, #clear {
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        #dropbox {
+            position: relative;
+            left: 10px;
+            cursor: pointer;
+        }
+
+        #responses {
+            width: 100%;
+            height: 900px;
+            overflow: auto;
+        }
+
+        .response {
+            width: 100%;
+            border: 1px black solid;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            word-break: break-all;
+            background-color: white;
+        }
+
+        .response col {
+            width: 50%;
+        }
+
+        .response td {
+            padding: 10px;
+            border: 1px black solid;
+        }
+
+        .response tr:first-of-type {
+            background-color: lightgray;
+        }
+
+        .response tr:first-of-type td {
+            border: 0;
+        }
+
+        .date-time {
+            text-align: right;
+        }
+
+        .date-time-img {
+            height: 0.8em;
+            display: none;
+            cursor: pointer;
+
+        }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//www.dropbox.com/static/api/dropbox-datastores-1.2-latest.js"></script>
+    <script>
+        Date.prototype.ddmmyyyy = function () {
+            var dd = ("0" + this.getDate()).slice(-2);
+            var mm = ("0" + (this.getMonth() + 1)).slice(-2);
+            var yyyy = this.getFullYear().toString();
+            var hours = this.getHours().toString();
+            var minutes = ("0" + this.getMinutes()).slice(-2);
+            var seconds = ("0" + this.getSeconds()).slice(-2);
+            return dd + "." + mm + "." + yyyy + " " + hours + ":" + minutes + ":" + seconds;
+        };
+
+        var adminClient;
+        var tableResponses;
+
+        $(window).ready(function () {
+            $("#dropbox").height($("#send").height() + 5 + "px");
+
+            getDataFromDropbox().done(function () {
+                adminAuth(true);
+            });
+
+            $("#send").click(function (e) {
+                $(e.delegateTarget).prop("disabled", true);
+                setTimeout(function () {
+                    $(e.delegateTarget).prop("disabled", false);
+                }, 2000);
+                var name = $("#name").prop("value");
+                var response = $("#response").prop("value").replace(/[\r|\n]/g, "<br>");
+                var date = new Date().ddmmyyyy();
+                $("#response").prop("value", "");
+                addResponse(date, name, response, true);
+            });
+
+            $("#clear").click(function () {
+                var results = tableResponses.query();
+                for (var i in results) {
+                    results[i].deleteRecord();
+                }
+                $(".response").remove();
+            });
+        });
+
+        function deleteResponse(object) {
+            var queryDate = $(object).parent().text();
+            var item = $(object).closest("table");
+            item.wrap("<div/>").parent().slideUp("normal", function () {
+                item.unwrap();
+                item.remove();
+            });
+            var record = tableResponses.query({date: queryDate});
+            for (var i in record) record[i].deleteRecord();
+        }
+
+        function addResponse(date, name, response, addToDatastore) {
+            if (addToDatastore == true) {
+                tableResponses.insert({
+                    "date": date,
+                    "name": name,
+                    "response": response
+                });
+            }
+
+            var deleteIcon = "data:image/png;base64,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";
+
+            var item = "<div style='display: none'><table class=\"response\">" +
+                    "<colgroup>" +
+                    "<col>" +
+                    "<col>" +
+                    "</colgroup>" +
+                    "<tr><td>" + name + "</td><td class=\"date-time\"><img class=\"date-time-img\" src=\"" + deleteIcon + "\" onclick=\"deleteResponse(this)\"/>" + date + "</td>" +
+                    "<tr><td colspan=\"2\">" + response + "</td></tr>" +
+                    "</table></div>";
+
+            var showDeleteButton = false;
+            if (adminClient) showDeleteButton = adminClient.isAuthenticated();
+
+            $($("#responses").prepend(item)).find(".date-time-img").toggle(showDeleteButton);
+            item = $($(".response:first-of-type")[0]);
+            item.parent().slideDown("normal", function () {
+                item.unwrap();
+            });
+        }
+
+        function getDataFromDropbox() {
+            var client = new Dropbox.Client({token: "thNrJGZFSrYAAAAAAAASt_uAAjmVP1Cxow4s_NLuENIyVttyHkK_PFq8x3Dij0IU"});
+            client.authenticate();
+            var datastoreManager = client.getDatastoreManager();
+
+            var result = $.Deferred();
+            datastoreManager.openDefaultDatastore(function (error, datastore) {
+                if (error) alert(error);
+                tableResponses = datastore.getTable("responses");
+
+                var results = tableResponses.query();
+                var date;
+                var name;
+                var response;
+
+                for (var i in results) {
+                    date = results[i].get("date");
+                    name = results[i].get("name");
+                    response = results[i].get("response");
+                    addResponse(date, name, response, false);
+                }
+                $("#send").prop("disabled", false);
+                result.resolve();
+            });
+
+            return result;
+        }
+
+        function adminAuth(checkonly) {
+            adminClient = new Dropbox.Client({key: "fl7lsfuq39pnz8l"});
+            adminClient.authDriver(new Dropbox.AuthDriver.Popup({receiverUrl: "http://test.com/guestbook_receiver.html"}));
+//            adminClient.authDriver(new Dropbox.AuthDriver.Popup({receiverUrl: window.location.origin + "/gorevichlv/src/html/guestbook_receiver.html"}));
+            adminClient.authenticate({interactive: false}, function (e) {
+                if (e) {
+                    console.error(e);
+                    return;
+                }
+
+                function login() {
+                    if (adminClient.isAuthenticated()) {
+                        enableAdminFunctions(true);
+                        clearInterval(interval);
+                    }
+                }
+
+                if (checkonly == true) {
+                    login();
+                    return;
+                }
+
+                if (adminClient.isAuthenticated() == false) adminClient.authenticate();
+
+                var interval = setInterval(function () {
+                    login();
+                }, 100);
+            });
+        }
+
+        function enableAdminFunctions(state) {
+            $("#clear").prop("disabled", !state);
+            $(".date-time-img").toggle(state);
+            $("#dropbox").attr("onclick", state ? "enableAdminFunctions(false)" : "adminAuth(false)");
+
+            if (state == false) {
+                $("#dropbox").css("pointer-events", "none");
+                adminClient.signOut(function () {
+                    $("#dropbox").css("pointer-events", "auto");
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+<div id="form_response">
+    <input type="text" id="name" placeholder="Ім'я">
+    <textarea id="response" placeholder="Відгук" cols="40" rows="10" maxlength="1000"></textarea>
+    <button id="send" disabled>Відправити</button>
+    <button id="clear" disabled>Видалити всі записи</button>
+    <img id="dropbox" src="//www.dropbox.com/static/images/icons/blue_dropbox_glyph.png" onclick="adminAuth(false)"/>
+</div>
+
+<div id="responses">
+    <!--<table class="response">-->
+    <!--<colgroup>-->
+    <!--<col>-->
+    <!--<col>-->
+    <!--</colgroup>-->
+    <!--<tr>-->
+    <!--<td>Ім'я</td>-->
+    <!--<td class="date-time"><img-->
+    <!--src="data:image/png;base64,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"/>12.12.2012-->
+    <!--12:12:00-->
+    <!--</td>-->
+    <!--</tr>-->
+    <!--<tr>-->
+    <!--<td colspan="2">-->
+    <!--</td>-->
+    <!--</tr>-->
+    <!--</table>-->
+</div>
+</body>
+</html>
