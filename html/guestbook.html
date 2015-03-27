@@ -89,6 +89,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="//www.dropbox.com/static/api/dropbox-datastores-1.2-latest.js"></script>
     <script>
+        alert(window.location.origin);
         Date.prototype.ddmmyyyy = function () {
             var dd = ("0" + this.getDate()).slice(-2);
             var mm = ("0" + (this.getMonth() + 1)).slice(-2);
@@ -201,7 +202,7 @@
 
         function adminAuth(checkonly) {
             adminClient = new Dropbox.Client({key: "fl7lsfuq39pnz8l"});
-            adminClient.authDriver(new Dropbox.AuthDriver.Popup({receiverUrl: "http://test.com/guestbook_receiver.html"}));
+            adminClient.authDriver(new Dropbox.AuthDriver.Popup({receiverUrl: "guestbook_receiver.html"}));
 //            adminClient.authDriver(new Dropbox.AuthDriver.Popup({receiverUrl: window.location.origin + "/gorevichlv/src/html/guestbook_receiver.html"}));
             adminClient.authenticate({interactive: false}, function (e) {
                 if (e) {
