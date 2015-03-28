@@ -89,7 +89,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="//www.dropbox.com/static/api/dropbox-datastores-1.2-latest.js"></script>
     <script>
-        alert("origin: " + window.location);
+        alert(window.location);
         Date.prototype.ddmmyyyy = function () {
             var dd = ("0" + this.getDate()).slice(-2);
             var mm = ("0" + (this.getMonth() + 1)).slice(-2);
