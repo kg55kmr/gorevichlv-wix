@@ -210,6 +210,8 @@
         }
 
         function adminAuth(checkonly) {
+            alert(window.location.href);
+            return;
             var urlReceiver = /(.*gorevichlv-wix\/.*\/)/.exec(window.location.href)[1] + "guestbook_receiver.html";
 
             adminClient = new Dropbox.Client({key: "fl7lsfuq39pnz8l"});
