@@ -104,21 +104,23 @@
         var tableResponses;
 
         $(window).ready(function () {
-            $("#dropbox").height($("#send").height() + 5 + "px");
+            var $send = $("#send");
+            $("#dropbox").height($send.height() + 5 + "px");
 
             getDataFromDropbox().done(function () {
                 adminAuth(true);
             });
 
-            $("#send").click(function (e) {
+            $send.click(function (e) {
                 $(e.delegateTarget).prop("disabled", true);
                 setTimeout(function () {
                     $(e.delegateTarget).prop("disabled", false);
                 }, 2000);
                 var name = $("#name").prop("value");
-                var response = $("#response").prop("value").replace(/[\r|\n]/g, "<br>");
+                var $response = $("#response");
+                var response = $response.prop("value").replace(/[\r|\n]/g, "<br>");
                 var date = new Date().ddmmyyyy();
-                $("#response").prop("value", "");
+                $response.prop("value", "");
                 addResponse(date, name, response, true);
             });
 
