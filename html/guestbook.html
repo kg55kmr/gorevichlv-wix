@@ -89,7 +89,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="//www.dropbox.com/static/api/dropbox-datastores-1.2-latest.js"></script>
     <script>
-        alert("origin: " + window.location.origin);
+        alert("origin: " + window.location);
         Date.prototype.ddmmyyyy = function () {
             var dd = ("0" + this.getDate()).slice(-2);
             var mm = ("0" + (this.getMonth() + 1)).slice(-2);
@@ -127,7 +127,7 @@
             $("#clear").click(function () {
                 var results = tableResponses.query();
                 for (var i in results) {
-                    results[i].deleteRecord();
+                    if (results.hasOwnProperty(i)) results[i].deleteRecord();
                 }
                 $(".response").remove();
             });
@@ -136,12 +136,15 @@
         function deleteResponse(object) {
             var queryDate = $(object).parent().text();
             var item = $(object).closest("table");
-            item.wrap("<div/>").parent().slideUp("normal", function () {
+            var $wrap = item.wrap("<div/>");
+            $wrap.parent().slideUp("normal", function () {
                 item.unwrap();
                 item.remove();
             });
             var record = tableResponses.query({date: queryDate});
-            for (var i in record) record[i].deleteRecord();
+            for (var i in record) {
+                if (record.hasOwnProperty(i)) record[i].deleteRecord();
+            }
         }
 
         function addResponse(date, name, response, addToDatastore) {
@@ -190,10 +193,12 @@
                 var response;
 
                 for (var i in results) {
-                    date = results[i].get("date");
-                    name = results[i].get("name");
-                    response = results[i].get("response");
-                    addResponse(date, name, response, false);
+                    if (results.hasOwnProperty(i)) {
+                        date = results[i].get("date");
+                        name = results[i].get("name");
+                        response = results[i].get("response");
+                        addResponse(date, name, response, false);
+                    }
                 }
                 $("#send").prop("disabled", false);
                 result.resolve();
@@ -235,10 +240,11 @@
         function enableAdminFunctions(state) {
             $("#clear").prop("disabled", !state);
             $(".date-time-img").toggle(state);
-            $("#dropbox").attr("onclick", state ? "enableAdminFunctions(false)" : "adminAuth(false)");
+            var $dropbox = $("#dropbox");
+            $dropbox.attr("onclick", state ? "enableAdminFunctions(false)" : "adminAuth(false)");
 
             if (state == false) {
-                $("#dropbox").css("pointer-events", "none");
+                $dropbox.css("pointer-events", "none");
                 adminClient.signOut(function () {
                     $("#dropbox").css("pointer-events", "auto");
                 });
