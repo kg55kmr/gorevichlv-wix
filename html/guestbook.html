@@ -192,13 +192,15 @@
                 var name;
                 var response;
 
+                var record;
+
                 for (var i in results) {
-                    if (results.hasOwnProperty(i)) {
-                        date = results[i].get("date");
-                        name = results[i].get("name");
-                        response = results[i].get("response");
-                        addResponse(date, name, response, false);
-                    }
+                    //noinspection JSUnfilteredForInLoop
+                    record = results[i];
+                    date = record.get("date");
+                    name = record.get("name");
+                    response = record.get("response");
+                    addResponse(date, name, response, false);
                 }
                 $("#send").prop("disabled", false);
                 result.resolve();

@@ -1,13 +1,10 @@
-/**
- * Created by Alexander on 22.03.2015.
- */
-
 (function ($) {
     var localApiKey;
     var localUserId;
 
+    //noinspection JSUnusedGlobalSymbols
     $.extend({
-        getPhotosFromSet: function(apiKey, userId, photosetId) {
+        getPhotosFromSet: function (apiKey, userId, photosetId) {
             localApiKey = apiKey;
             localUserId = userId;
 
@@ -36,15 +33,14 @@
                     return deferred;
                 }
                 var photos = [];
+                //noinspection JSUnresolvedVariable
                 $.each(data.photoset.photo, function (_, value) {
                     photos.push(value.id);
                 });
                 deferred.resolve(photos);
             });
-
         return deferred;
     }
-
     function getPhotosSizes(photosId) {
         var deferred = $.Deferred();
         var defferedObjects = [];
@@ -53,11 +49,13 @@
         var photo = {};
 
         for (var i in photosId) {
+            //noinspection JSUnfilteredForInLoop
             defferedObjects.push(flickrREST(localApiKey, "flickr.photos.getSizes", "&photo_id=" + photosId[i]));
         }
         $.when.apply($, defferedObjects).done(function () {
             $.each(arguments, function (_, value) {
                 photo = {};
+                //noinspection JSUnresolvedVariable
                 $.each(value.sizes.size, function (_, item) {
                     photo[item.label] = {};
                     photo[item.label].width = item.width;
