@@ -211,7 +211,6 @@
 
         function adminAuth(checkonly) {
             var urlReceiver = /(.*gorevichlv-wix\/.*\/)/.exec(window.location.href)[1] + "guestbook_receiver.html";
-            urlReceiver = urlReceiver.replace("http", "https");
 
             adminClient = new Dropbox.Client({key: "fl7lsfuq39pnz8l"});
             adminClient.authDriver(new Dropbox.AuthDriver.Popup({receiverUrl: urlReceiver}));
